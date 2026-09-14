@@ -12,8 +12,55 @@ export const chatTools: FunctionDeclaration[] = [
   },
   {
     name: 'get_products',
-    description:
-      'Fetches products from the ecommerce API. Use this when the user asks about products, product availability, prices, stock, or product details.',
+    description: `
+Fetches products from the ecommerce API.
+
+Use this tool when the user asks about:
+- products
+- product details
+- product availability
+- stock
+- price
+- discount
+- product images
+- product categories
+- comparing products
+
+Each product may contain:
+- id
+- name
+- sku
+- description
+- short_description
+- regular_price
+- discount_price
+- total_stock
+- category
+- images
+- variants
+- delivery methods
+
+Product image paths are relative paths.
+
+The public storage base URL is:
+https://admin.sohojkroy.com/storage
+
+To construct a complete product image URL, append the image_path
+to the storage base URL.
+
+Example:
+image_path:
+products/gallery/example.png
+
+Full image URL:
+https://admin.sohojkroy.com/storage/products/gallery/example.png
+
+If the user asks to see, view, show, or send product images,
+use the product images returned by this tool.
+
+Do not invent image paths or image URLs.
+Only use image URLs constructed from image paths returned by this tool.
+  `.trim(),
     parameters: {
       type: Type.OBJECT,
       properties: {},
