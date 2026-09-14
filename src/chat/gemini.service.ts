@@ -14,7 +14,7 @@ export class GeminiService {
       apiKey: this.config.getOrThrow<string>('GEMINI_API_KEY'),
     });
 
-    this.model = this.config.get<string>('GEMINI_MODEL') ?? 'gemini-2.5-flash';
+    this.model = this.config.get<string>('GEMINI_MODEL') ?? 'gemini-3.1-flash-lite';
   }
 
   async chat(message: string) {
