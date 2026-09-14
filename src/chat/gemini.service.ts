@@ -92,7 +92,7 @@ export class GeminiService {
       },
     });
 
-    return message;
+    return response.text;
   }
 
   private getSystemInstruction(responseType: ChatResponseType): string {
