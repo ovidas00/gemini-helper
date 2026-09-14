@@ -40,16 +40,33 @@ export class WebhookController {
 
     const response = await this.geminiService.chat(message, 'facebook');
 
+    if (!response) {
+      return {
+        success: true,
+        message: 'No response from Gemini',
+      };
+    }
+
+    const responseMessage =
+      typeof response === 'string' ? response : response.message;
+
+    if (!responseMessage) {
+      return {
+        success: true,
+        message: 'Empty response from Gemini',
+      };
+    }
+
     let parsedResponse: {
       message?: string;
       images?: string[];
     };
 
     try {
-      parsedResponse = JSON.parse(response.message);
+      parsedResponse = JSON.parse(responseMessage);
     } catch {
       parsedResponse = {
-        message: response.message,
+        message: responseMessage,
         images: [],
       };
     }
