@@ -47,6 +47,9 @@ export class WebhookController {
       await this.facebookService.sendMessage(senderId, response.message);
     }
 
+    console.log(typeof response);
+    console.log(response);
+
     for (const image of response.images ?? []) {
       await this.facebookService.sendImage(senderId, image);
     }
