@@ -38,31 +38,19 @@ export class WebhookController {
       };
     }
 
-    const response = await this.geminiService.chat(message, 'facebook');
-
-    let parsedResponse: {
+    const response = (await this.geminiService.chat(message, 'facebook')) as {
       message?: string;
       images?: string[];
     };
 
-    try {
-      parsedResponse = JSON.parse(response.message);
-    } catch {
-      parsedResponse = {
-        message: response.message,
-        images: [],
-      };
+    if (response.message) {
+      await this.facebookService.sendMessage(senderId, response.message);
     }
 
-    if (parsedResponse.message) {
-      await this.facebookService.sendMessage(senderId, parsedResponse.message);
-    }
+    console.log(typeof response);
+    console.log(response);
 
-    for (const image of parsedResponse.images ?? []) {
-      if (typeof image !== 'string' || !image.trim()) {
-        continue;
-      }
-
+    for (const image of response.images ?? []) {
       await this.facebookService.sendImage(senderId, image);
     }
 
