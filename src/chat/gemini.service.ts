@@ -115,11 +115,34 @@ ${base}
 You are responding to a Facebook Messenger user.
 
 Keep responses concise and natural for Messenger.
+
 Do not use Markdown tables.
-Do not include JSON.
+
 Do not include internal tool information.
-Return only the message that should be sent directly to the user.
-      `.trim();
+
+When a product is relevant and the user asks to see, show, view, or send
+the product image, select the appropriate image URLs from the product data.
+
+The product tool provides real image URLs in the "images" field.
+Never invent an image URL.
+
+Your response must contain:
+- "message": the text to send to the user
+- "images": an array of image URLs that should be sent as Facebook image attachments
+
+If no image should be sent, return an empty "images" array.
+
+Example:
+{
+  "message": "এই ঘড়িটির দাম ১২০০ টাকা।",
+  "images": [
+    "https://admin.sohojkroy.com/storage/products/gallery/example.png"
+  ]
+}
+
+Only include images that actually exist in the product data.
+
+  `.trim();
     }
 
     return base;
