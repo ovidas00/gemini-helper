@@ -29,14 +29,21 @@ export class WebhookController {
     const event = data.entry?.[0]?.messaging?.[0];
 
     const senderId = event?.sender?.id;
+    const messageId = event?.message?.mid;
     const message = event?.message?.text;
 
-    if (!senderId || !message) {
+    if (!senderId || !messageId || !message) {
       return {
         success: true,
         message: 'No message found',
       };
     }
+
+    console.log('Facebook message:', {
+      messageId,
+      senderId,
+      message,
+    });
 
     const response = await this.geminiService.chat(message, 'facebook');
 
@@ -71,7 +78,7 @@ export class WebhookController {
       };
     }
 
-    if (parsedResponse.message) {
+    if (parsedResponse.message?.trim()) {
       await this.facebookService.sendMessage(senderId, parsedResponse.message);
     }
 
@@ -83,6 +90,9 @@ export class WebhookController {
       await this.facebookService.sendImage(senderId, image);
     }
 
-    return 'done';
+    return {
+      success: true,
+      message: 'done',
+    };
   }
 }
