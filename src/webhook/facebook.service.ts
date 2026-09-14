@@ -13,6 +13,34 @@ export class FacebookService {
   }
 
   async sendMessage(recipientId: string, message: string) {
+    return this.request({
+      recipient: {
+        id: recipientId,
+      },
+      message: {
+        text: message,
+      },
+    });
+  }
+
+  async sendImage(recipientId: string, imageUrl: string) {
+    return this.request({
+      recipient: {
+        id: recipientId,
+      },
+      message: {
+        attachment: {
+          type: 'image',
+          payload: {
+            url: imageUrl,
+            is_reusable: true,
+          },
+        },
+      },
+    });
+  }
+
+  private async request(body: any) {
     const response = await fetch(
       `${this.graphUrl}/me/messages?access_token=${this.accessToken}`,
       {
@@ -20,14 +48,7 @@ export class FacebookService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          recipient: {
-            id: recipientId,
-          },
-          message: {
-            text: message,
-          },
-        }),
+        body: JSON.stringify(body),
       },
     );
 
