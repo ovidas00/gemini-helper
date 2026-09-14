@@ -38,16 +38,15 @@ export class WebhookController {
       };
     }
 
-    const response = (await this.geminiService.chat(message, 'facebook')) as {
-      message?: string;
-      images?: string[];
-    };
+    const response = await this.geminiService.chat(message, 'facebook');
 
-    if (response.message) {
-      await this.facebookService.sendMessage(senderId, response.message);
+    const parsedResponse = JSON.parse(response.message!);
+
+    if (parsedResponse.message) {
+      await this.facebookService.sendMessage(senderId, parsedResponse.message);
     }
 
-    for (const image of response.images ?? []) {
+    for (const image of parsedResponse.images ?? []) {
       await this.facebookService.sendImage(senderId, image);
     }
 
