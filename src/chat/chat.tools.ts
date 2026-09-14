@@ -2,43 +2,23 @@ import { Type, type FunctionDeclaration } from '@google/genai';
 
 export const chatTools: FunctionDeclaration[] = [
   {
-    name: 'add_numbers',
-    description: 'Adds two numbers together.',
+    name: 'get_categories',
+    description:
+      'Fetches the product categories from the ecommerce API. Use this when the user asks about available categories, product categories, category names, or wants to know what categories exist.',
     parameters: {
       type: Type.OBJECT,
-      properties: {
-        a: {
-          type: Type.NUMBER,
-          description: 'First number',
-        },
-        b: {
-          type: Type.NUMBER,
-          description: 'Second number',
-        },
-      },
-      required: ['a', 'b'],
+      properties: {},
     },
   },
-
   {
-    name: 'multiply_numbers',
-    description: 'Multiplies two numbers together.',
+    name: 'get_products',
+    description:
+      'Fetches products from the ecommerce API. Use this when the user asks about products, product availability, prices, stock, or product details.',
     parameters: {
       type: Type.OBJECT,
-      properties: {
-        a: {
-          type: Type.NUMBER,
-          description: 'First number',
-        },
-        b: {
-          type: Type.NUMBER,
-          description: 'Second number',
-        },
-      },
-      required: ['a', 'b'],
+      properties: {},
     },
   },
-
   {
     name: 'get_current_time',
     description: 'Returns the current server date and time.',
@@ -60,15 +40,75 @@ export const chatTools: FunctionDeclaration[] = [
 
 export async function executeTool(name: string, args: Record<string, any>) {
   switch (name) {
-    case 'add_numbers':
-      return {
-        result: Number(args.a) + Number(args.b),
-      };
+    case 'get_categories': {
+      const response = await fetch(
+        'https://admin.sohojkroy.com/api/categories',
+      );
 
-    case 'multiply_numbers':
+      if (!response.ok) {
+        throw new Error(`Categories API returned ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      return data;
+    }
+
+    case 'get_products': {
+      const response = await fetch('https://admin.sohojkroy.com/api/products');
+
+      if (!response.ok) {
+        throw new Error(`Products API returned ${response.status}`);
+      }
+
+      const result = await response.json();
+
       return {
-        result: Number(args.a) * Number(args.b),
+        products:
+          result.data?.data?.map((product: any) => ({
+            id: product.id,
+            sku: product.sku,
+            name: product.name,
+            slug: product.slug,
+            description: product.description,
+            shortDescription: product.short_description,
+
+            category: product.category
+              ? {
+                  id: product.category.id,
+                  name: product.category.name,
+                  slug: product.category.slug,
+                }
+              : null,
+
+            stock: product.total_stock,
+            regularPrice: product.regular_price,
+            discountPrice: product.discount_price,
+
+            isFeatured: product.is_featured,
+            isOffer: product.is_offer,
+            isCampaign: product.is_campaign,
+            status: product.status,
+
+            mainImage: product.main_image,
+
+            keywordTags: product.keyword_tags,
+
+            reviews: {
+              count: product.reviews_count,
+              averageRating: product.reviews_avg_rating,
+            },
+
+            variants: product.variants,
+
+            deliveryMethods: product.delivery_methods?.map((delivery: any) => ({
+              name: delivery.name,
+              charge: delivery.charge,
+              active: delivery.is_active,
+            })),
+          })) ?? [],
       };
+    }
 
     case 'get_current_time':
       return {
