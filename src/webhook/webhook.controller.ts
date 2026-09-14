@@ -1,12 +1,14 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { WebhookService } from './webhook.service';
 import { GeminiService } from 'src/chat/gemini.service';
+import { FacebookService } from './facebook.service';
 
 @Controller('webhook')
 export class WebhookController {
   constructor(
     private readonly webhookService: WebhookService,
     private readonly geminiService: GeminiService,
+    private readonly facebookService: FacebookService,
   ) {}
 
   @Get('facebook')
@@ -24,17 +26,21 @@ export class WebhookController {
 
   @Post('facebook')
   async handleFacebookWebhook(@Body() data: any) {
-    const message = data.entry?.[0]?.messaging?.[0]?.message?.text;
+    const event = data.entry?.[0]?.messaging?.[0];
 
-    if (!message) {
+    const senderId = event?.sender?.id;
+    const message = event?.message?.text;
+
+    if (!senderId || !message) {
       return {
         success: true,
-        message: 'No message text found',
+        message: 'No message found',
       };
     }
 
     const response = await this.geminiService.chat(message);
-    console.log(response);
+
+    await this.facebookService.sendMessage(senderId, response.message!);
 
     return 'done';
   }
