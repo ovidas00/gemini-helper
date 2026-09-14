@@ -38,7 +38,7 @@ export class WebhookController {
       };
     }
 
-    const response = await this.geminiService.chat(message);
+    const response = await this.geminiService.chat(message, 'facebook');
 
     await this.facebookService.sendMessage(senderId, response.message!);
 

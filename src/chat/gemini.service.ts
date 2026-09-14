@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI, type Part } from '@google/genai';
-
 import { chatTools, executeTool } from './chat.tools';
+
+export type ChatResponseType = 'default' | 'facebook' | 'whatsapp' | 'telegram';
 
 @Injectable()
 export class GeminiService {
@@ -18,20 +19,14 @@ export class GeminiService {
       this.config.get<string>('GEMINI_MODEL') ?? 'gemini-3.1-flash-lite';
   }
 
-  async chat(message: string) {
+  async chat(message: string, responseType: ChatResponseType = 'default') {
+    const systemInstruction = this.getSystemInstruction(responseType);
+
     let response = await this.client.models.generateContent({
       model: this.model,
       contents: message,
       config: {
-        systemInstruction: `
-You are a helpful assistant.
-
-You have access to several tools.
-Use them when they are useful instead of guessing.
-
-Available tools can perform simple calculations,
-retrieve server information, and get the current time.
-      `.trim(),
+        systemInstruction,
 
         tools: [
           {
@@ -46,7 +41,6 @@ retrieve server information, and get the current time.
     if (!functionCalls?.length) {
       return {
         message: response.text,
-        toolCalls: [],
       };
     }
 
@@ -88,12 +82,7 @@ retrieve server information, and get the current time.
         },
       ],
       config: {
-        systemInstruction: `
-You are a helpful assistant.
-
-Use the tool results to answer the user's question.
-Do not mention internal tool mechanics unless useful.
-      `.trim(),
+        systemInstruction,
 
         tools: [
           {
@@ -106,5 +95,33 @@ Do not mention internal tool mechanics unless useful.
     return {
       message: response.text,
     };
+  }
+
+  private getSystemInstruction(responseType: ChatResponseType): string {
+    const base = `
+You are a helpful assistant.
+
+You have access to several tools.
+Use them when they are useful instead of guessing.
+
+Available tools can perform simple calculations,
+retrieve server information, and get the current time.
+    `.trim();
+
+    if (responseType === 'facebook') {
+      return `
+${base}
+
+You are responding to a Facebook Messenger user.
+
+Keep responses concise and natural for Messenger.
+Do not use Markdown tables.
+Do not include JSON.
+Do not include internal tool information.
+Return only the message that should be sent directly to the user.
+      `.trim();
+    }
+
+    return base;
   }
 }
