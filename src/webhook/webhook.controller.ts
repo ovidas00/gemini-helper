@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { WebhookService } from './webhook.service';
 
 @Controller('webhook')
@@ -19,7 +19,7 @@ export class WebhookController {
   }
 
   @Post('faceboook')
-  handleFacebookWebhook() {
-    // Receive Facebook events/messages
+  handleFacebookWebhook(@Body() data) {
+    console.log(data);
   }
 }
