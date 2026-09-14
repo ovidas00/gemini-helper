@@ -18,7 +18,7 @@ export class WebhookController {
     );
   }
 
-  @Post('faceboook')
+  @Post('facebook')
   handleFacebookWebhook(@Body() data) {
     console.log(data);
   }
